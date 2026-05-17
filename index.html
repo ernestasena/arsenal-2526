@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#EF0107">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Arsenal 25/26">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔴</text></svg>">
+  <title>Arsenal 2025/26</title>
+  <style>
+    :root {
+      --red: #EF0107;
+      --dark-red: #9C0104;
+      --gold: #F5C34B;
+      --white: #FFFFFF;
+      --bg: #0d0d0d;
+      --card: #1a1a1a;
+      --text: #e0e0e0;
+      --text-dim: #888;
+      --green: #00C853;
+      --yellow: #FFD600;
+      --loss: #FF1744;
+      --border: #2a2a2a;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      padding-bottom: env(safe-area-inset-bottom, 20px);
+      -webkit-user-select: none;
+      user-select: none;
+    }
+    .header {
+      background: linear-gradient(135deg, var(--red), var(--dark-red));
+      padding: 20px 16px 16px;
+      padding-top: calc(20px + env(safe-area-inset-top, 0px));
+      text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.3);
+    }
+    .header .crest { font-size: 40px; }
+    .header h1 { font-size: 18px; font-weight: 700; margin-top: 4px; letter-spacing: -0.3px; }
+    .header .subtitle { font-size: 12px; opacity: 0.8; margin-top: 2px; }
+    .stats-bar {
+      display: flex;
+      justify-content: space-around;
+      padding: 14px 8px;
+      background: var(--card);
+      border-bottom: 1px solid var(--border);
+    }
+    .stat { text-align: center; }
+    .stat .num { font-size: 24px; font-weight: 800; color: var(--white); }
+    .stat .num.green { color: var(--green); }
+    .stat .num.gold { color: var(--gold); }
+    .stat .num.redd { color: var(--loss); }
+    .stat .label { font-size: 10px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+    .filter-bar {
+      display: flex;
+      gap: 6px;
+      padding: 12px 12px;
+      overflow-x: auto;
+      background: var(--bg);
+      position: sticky;
+      top: 110px;
+      z-index: 99;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .filter-bar::-webkit-scrollbar { display: none; }
+    .filter-btn {
+      padding: 8px 16px;
+      border-radius: 20px;
+      border: 1.5px solid var(--border);
+      background: var(--card);
+      color: var(--text-dim);
+      font-size: 13px;
+      font-weight: 600;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    .filter-btn.active {
+      background: var(--red);
+      border-color: var(--red);
+      color: var(--white);
+    }
+    .matches { padding: 8px 12px 40px; }
+    .month-header {
+      color: var(--gold);
+      font-size: 14px;
+      font-weight: 700;
+      margin: 16px 0 8px;
+      padding-left: 4px;
+      letter-spacing: 0.5px;
+    }
+    .match-card {
+      display: flex;
+      align-items: center;
+      padding: 12px;
+      background: var(--card);
+      border-radius: 12px;
+      margin-bottom: 6px;
+      gap: 12px;
+      border-left: 3px solid transparent;
+      transition: transform 0.15s;
+    }
+    .match-card:active { transform: scale(0.98); }
+    .match-card.win { border-left-color: var(--green); }
+    .match-card.draw { border-left-color: var(--yellow); }
+    .match-card.loss { border-left-color: var(--loss); }
+    .match-card.upcoming { border-left-color: var(--gold); }
+    .match-date {
+      min-width: 42px;
+      text-align: center;
+      font-size: 12px;
+    }
+    .match-date .day { font-size: 20px; font-weight: 800; }
+    .match-date .month { font-size: 11px; color: var(--text-dim); text-transform: uppercase; }
+    .match-info { flex: 1; min-width: 0; }
+    .match-info .comp {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--text-dim);
+      margin-bottom: 2px;
+    }
+    .match-info .opponent {
+      font-size: 15px;
+      font-weight: 600;
+    }
+    .match-info .venue { font-size: 11px; color: var(--text-dim); }
+    .match-score {
+      font-size: 18px;
+      font-weight: 800;
+      text-align: right;
+      min-width: 40px;
+      font-variant-numeric: tabular-nums;
+    }
+    .match-score .result-badge {
+      display: inline-block;
+      width: 28px;
+      height: 28px;
+      line-height: 28px;
+      text-align: center;
+      border-radius: 50%;
+      font-size: 13px;
+      font-weight: 800;
+    }
+    .result-badge.w { background: var(--green); color: #000; }
+    .result-badge.d { background: var(--yellow); color: #000; }
+    .result-badge.l { background: var(--loss); color: #fff; }
+    .result-badge.u { background: var(--gold); color: #000; }
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-dim);
+    }
+    .empty-state .icon { font-size: 48px; margin-bottom: 12px; }
+    .trophy-row {
+      display: flex;
+      gap: 8px;
+      padding: 0 12px 16px;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+    .trophy-row::-webkit-scrollbar { display: none; }
+    .trophy-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      padding: 8px 14px;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 700;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    .trophy-pill.cl { background: #0a2540; color: #64B5F6; border: 1px solid #1a3a5c; }
+    .trophy-pill.pl { background: #1a0a20; color: #CE93D8; border: 1px solid #2a1a30; }
+    .trophy-pill.fac { background: #1a1000; color: #FFD54F; border: 1px solid #2a2000; }
+    .trophy-pill.efl { background: #001a10; color: #69F0AE; border: 1px solid #003020; }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="crest">🔴</div>
+    <h1>Arsenal 2025/26</h1>
+    <div class="subtitle">#COYG · 34th Premier League Season</div>
+  </div>
+
+  <div class="stats-bar" id="stats"></div>
+
+  <div class="trophy-row" id="trophies"></div>
+
+  <div class="filter-bar">
+    <button class="filter-btn active" data-filter="all">All</button>
+    <button class="filter-btn" data-filter="Premier League">🏆 PL</button>
+    <button class="filter-btn" data-filter="Champions League">⭐ UCL</button>
+    <button class="filter-btn" data-filter="FA Cup">🏴 FA Cup</button>
+    <button class="filter-btn" data-filter="EFL Cup">🏆 EFL Cup</button>
+  </div>
+
+  <div class="matches" id="matches"></div>
+
+  <script src="app.js"></script>
+</body>
+</html>
